@@ -1,0 +1,12 @@
+{
+  "Plugin-Class": "org.efly.EflyPlugin",
+  "Name": "FBanna's Efly",
+  "Version": "${plugin_version}",
+  "Description": "Vanilla low firework usage efly",
+  "Authors": [
+    "FBanna"
+  ],
+  "Minecraft-Versions": [
+    "1.20.1"
+  ]
+}
