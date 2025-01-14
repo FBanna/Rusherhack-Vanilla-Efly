@@ -162,7 +162,13 @@ public class EflyModule extends ToggleableModule {
                     // use if not using, spamming or turning
                     if (!using && fireworkDelay == 0 && i == -1) {
 
-                        mc.player.connection.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND,5));
+                        //mc.player.connection.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND,5));
+                        mc.player.connection.send(new ServerboundUseItemPacket(
+                                InteractionHand.MAIN_HAND,
+                                5,
+                                mc.player.getXRot(),
+                                mc.player.getYRot()
+                        ));
                         fireworkDelay = this.FireworkCoolDown.getValue();
 
                     } else {
