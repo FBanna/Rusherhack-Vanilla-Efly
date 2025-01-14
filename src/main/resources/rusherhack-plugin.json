@@ -1,6 +1,6 @@
 {
   "Plugin-Class": "org.efly.EflyPlugin",
-  "Name": "FBanna's Efly",
+  "Name": "FBanna's Efly (Fixed by EOT)",
   "Version": "${plugin_version}",
   "Description": "Vanilla low firework usage efly",
   "Authors": [

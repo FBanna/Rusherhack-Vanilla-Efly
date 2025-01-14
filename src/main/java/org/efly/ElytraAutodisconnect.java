@@ -3,9 +3,9 @@ package org.efly;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.rusherhack.client.api.events.client.EventUpdate;
-import org.rusherhack.core.event.subscribe.Subscribe;
 import org.rusherhack.client.api.feature.module.ModuleCategory;
 import org.rusherhack.client.api.feature.module.ToggleableModule;
+import org.rusherhack.core.event.subscribe.Subscribe;
 import org.rusherhack.core.setting.NumberSetting;
 
 public class ElytraAutodisconnect extends ToggleableModule {
