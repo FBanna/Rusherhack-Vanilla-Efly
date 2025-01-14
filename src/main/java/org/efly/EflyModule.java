@@ -6,6 +6,7 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.phys.Vec3;
 import org.rusherhack.client.api.events.client.EventUpdate;
 import org.rusherhack.client.api.utils.ChatUtils;
 import org.rusherhack.core.event.subscribe.Subscribe;
@@ -31,6 +32,8 @@ public class EflyModule extends ToggleableModule {
     float lastY;
     boolean usingFirework;
     int fireworkDelay;
+    private Long timeOfLastRubberband = System.currentTimeMillis();
+    private Vec3 lastPosition = new Vec3(0, 0, 0);
 
     private final NumberSetting<Integer> EflyUpPitch = new NumberSetting<>("Up Pitch", 0, -90, -1)
             .incremental(1)
@@ -58,6 +61,11 @@ public class EflyModule extends ToggleableModule {
             .incremental(1)
             .onChange(c -> i = c+1);
 
+    private final NumberSetting<Integer> RubberbandThreshold = new NumberSetting<>("Min Movement", 5, 1, 200)
+            .incremental(1);
+
+    private final NumberSetting<Double> RubberbandTime = new NumberSetting<>("Max Rubberband", 4.0, 1.0/20.0, 30.0)
+            .incremental(0.1);
 
     private final BooleanSetting FireWorks = new BooleanSetting("Fireworks", false);
 
@@ -81,23 +89,45 @@ public class EflyModule extends ToggleableModule {
                 this.MaxHeight,
                 this.MinHeight,
                 this.Steps,
-                this.FireWorks
+                this.FireWorks,
+                this.RubberbandTime,
+                this.RubberbandThreshold
         );
     }
+
+    private final ToggleableModule elytraFly = (ToggleableModule)RusherHackAPI.getModuleManager().getFeature("ElytraFly").orElseThrow();
 
 
 
     @Subscribe
     private void onUpdate(EventUpdate event) {
+        if (mc.player == null) return;
 
-        mc.player.setXRot(pitch);
+        if (elytraFly.isToggled()) {
+            if (timeOfLastRubberband == null) {
+                // begin rubberband timer
+                lastPosition = mc.player.position();
+                timeOfLastRubberband = System.currentTimeMillis();
+            } else if (lastPosition.distanceTo(mc.player.position()) < RubberbandThreshold.getValue()) {
+                if (System.currentTimeMillis() - timeOfLastRubberband < RubberbandTime.getValue() * 1000) return;
+                // has not moved in last cooldown, recover from rubberband
+                elytraFly.setToggled(false);
+                usingFirework = false;
+                goingUp = true;
+                timeOfLastRubberband = null;
+            } else {
+                // did not rubberband, restart checks for next interval
+                timeOfLastRubberband = null;
+            }
+            return;
+        }
 
         //moves to correct angle
         if (i < this.Steps.getValue() && i != -1) {
 
-           i = i+1;
-           pitch = mc.player.getXRot() + (target - tempPitch)/this.Steps.getValue();
-           fireworkDelay = this.FireworkCoolDown.getValue();
+            i = i+1;
+            pitch = mc.player.getXRot() + (target - tempPitch)/this.Steps.getValue();
+            fireworkDelay = this.FireworkCoolDown.getValue();
 
         } else {
 
@@ -109,7 +139,6 @@ public class EflyModule extends ToggleableModule {
             }
 
         }
-
 
         if(usingFirework){
 
@@ -133,7 +162,7 @@ public class EflyModule extends ToggleableModule {
                 target = this.FireworkMaintainPitch.getValue();
                 i = 0;
 
-            //if above height but below extra height
+                //if above height but below extra height
             } else if (mc.player.getY() >= this.MaxHeight.getValue() && !using ) {
 
                 usingFirework = false;
@@ -142,7 +171,7 @@ public class EflyModule extends ToggleableModule {
                 target = this.EflyDownPitch.getValue();
                 i = 0;
 
-            // if below height
+                // if below height
             } else {
                 if (mc.player.getY() <= MaxHeight.getValue() ){
 
@@ -162,13 +191,12 @@ public class EflyModule extends ToggleableModule {
                     // use if not using, spamming or turning
                     if (!using && fireworkDelay == 0 && i == -1) {
 
-                        //mc.player.connection.send(new ServerboundUseItemPacket(InteractionHand.MAIN_HAND,5));
                         mc.player.connection.send(new ServerboundUseItemPacket(
                                 InteractionHand.MAIN_HAND,
                                 5,
                                 mc.player.getXRot(),
                                 mc.player.getYRot()
-                        ));
+                                ));
                         fireworkDelay = this.FireworkCoolDown.getValue();
 
                     } else {
@@ -181,7 +209,7 @@ public class EflyModule extends ToggleableModule {
 
             }
 
-        // no firework going up
+            // no firework going up
         } else if (goingUp) {
 
             if (this.FireWorks.getValue() && lastY > mc.player.getY() && i == -1){
@@ -195,20 +223,20 @@ public class EflyModule extends ToggleableModule {
                 i = 0;
             }
 
-        //going down
+            //going down
         } else {
 
+            elytraFly.setToggled(true);
 
-            if(mc.player.getY() <= this.MinHeight.getValue()) {
-                tempPitch = mc.player.getXRot();
-                goingUp = true;
-                target = this.EflyUpPitch.getValue();
-                i = 0;
-            }
+//            if(mc.player.getY() <= this.MinHeight.getValue()) {
+//                tempPitch = mc.player.getXRot();
+//                goingUp = true;
+//                target = this.EflyUpPitch.getValue();
+//                i = 0;
+//            }
         }
 
-
-
+        mc.player.setXRot(pitch);
         lastY = (float) mc.player.getY();
 
     }
@@ -221,7 +249,7 @@ public class EflyModule extends ToggleableModule {
         pitch = mc.player.getXRot();
 
         if(mc.player.getY() < this.MaxHeight.getValue()) {
-            if( this.FireWorks.getValue() == false) {
+            if( !this.FireWorks.getValue() ) {
                 ChatUtils.print("TOO LOW");
                 toggle();
 
