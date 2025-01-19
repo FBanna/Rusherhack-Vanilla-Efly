@@ -64,4 +64,4 @@ jobs:
           tag: ${{ github.ref_name }}
           artifacts: "artifacts/*.jar"
           prerelease: false
-          body: ${{ github.ref_name }} + " Rhack efly release"
+          body: ${{ github.ref_name }} Rhack vanilla efly release

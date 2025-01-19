@@ -7,17 +7,17 @@ public class EflyPlugin extends Plugin{
 
     @Override
     public void onLoad() {
-        this.getLogger().info("FBanna's Efly loaded! (Fixed by EOT)");
+        this.getLogger().info("FBanna's Efly loaded!");
 
         final EflyModule eflyModule = new EflyModule();
-        final ElytraAutodisconnect elytraAutodisconnectModule = new ElytraAutodisconnect();
+        //final ElytraAutodisconnect elytraAutodisconnectModule = new ElytraAutodisconnect();
         RusherHackAPI.getModuleManager().registerFeature(eflyModule);
-        RusherHackAPI.getModuleManager().registerFeature(elytraAutodisconnectModule);
+        //RusherHackAPI.getModuleManager().registerFeature(elytraAutodisconnectModule);
     }
 
     @Override
     public void onUnload() {
-        this.getLogger().info("FBanna's Efly unloaded! (Fixed by EOT)");
+        this.getLogger().info("FBanna's Efly unloaded!");
     }
 
 }
