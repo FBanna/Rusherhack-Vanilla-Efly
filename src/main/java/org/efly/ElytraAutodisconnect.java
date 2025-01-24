@@ -2,6 +2,7 @@ package org.efly;
 
 import com.mojang.realmsclient.RealmsMainScreen;
 import net.minecraft.client.gui.screens.GenericMessageScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.TitleScreen;
 import net.minecraft.client.gui.screens.multiplayer.JoinMultiplayerScreen;
 import net.minecraft.client.multiplayer.ServerData;
@@ -39,12 +40,12 @@ public class ElytraAutodisconnect extends ToggleableModule {
         if (mc.player == null) return;
 
 
-
         int numberOfElytra = 0;
         for (int i = 0; i < mc.player.getInventory().getContainerSize(); i++) {
             ItemStack item = mc.player.getInventory().getItem(i);
             if (!item.is(Items.ELYTRA)) continue;
-            if (item.getMaxDamage() - item.getDamageValue() > item.getMaxDamage() / 2) numberOfElytra+=item.getCount();
+            if (item.getMaxDamage() - item.getDamageValue() > item.getMaxDamage() / 2)
+                numberOfElytra += item.getCount();
         }
 
         if (numberOfElytra <= minElytra.getValue()) {
@@ -53,12 +54,13 @@ public class ElytraAutodisconnect extends ToggleableModule {
             //    this.setToggled(false);
             //}
 
-            mc.player.connection.onDisconnect(new DisconnectionDetails(Component.literal("NO ELYTRAS")));
+            //mc.player.connection.onDisconnect(new DisconnectionDetails(Component.literal("NO ELYTRAS")));
+            mc.disconnect();
+            return;
             //mc.player.connection.onDisconnect();
+
         }
 
+
     }
-
-
-
 }
