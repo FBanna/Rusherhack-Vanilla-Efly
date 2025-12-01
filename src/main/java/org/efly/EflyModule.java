@@ -30,7 +30,11 @@ public class EflyModule extends ToggleableModule {
     int wiggle = 0;
     float pitch;
     float target;
+
     float tempPitch;
+    int tempSteps;
+
+
     boolean using = false;
     boolean goingUp = false;
     float lastY;
@@ -41,7 +45,7 @@ public class EflyModule extends ToggleableModule {
     private Vec3 lastPosition = new Vec3(0, 0, 0);
 
 
-    private final NumberSetting<Integer> EflyUpPitch = new NumberSetting<>("Up Pitch", 0, -90, -1)
+    private final NumberSetting<Integer> EflyUpPitch = new NumberSetting<>("Up Pitch", -40, -90, -1)
             .incremental(1)
             .onChange(c -> {
                 if(goingUp){
@@ -49,7 +53,7 @@ public class EflyModule extends ToggleableModule {
                 }
             });
 
-    private final NumberSetting<Integer> EflyDownPitch = new NumberSetting<>("Down Pitch", 0 , 0, 90)
+    private final NumberSetting<Integer> EflyDownPitch = new NumberSetting<>("Down Pitch", 40, 0, 90)
             .incremental(1)
             .onChange(c -> {
                 if(!goingUp) {
@@ -57,15 +61,15 @@ public class EflyModule extends ToggleableModule {
                 }
             });
 
-    private final NumberSetting<Integer> MaxHeight = new NumberSetting<>("Max Height", 500, -64, 2000)
+    private final NumberSetting<Integer> MaxHeight = new NumberSetting<>("Max Height", 380, -64, 2000)
             .incremental(5);
 
-    private final NumberSetting<Integer> MinHeight = new NumberSetting<>("Min Height", 500, -64, 2000)
+    private final NumberSetting<Integer> MinHeight = new NumberSetting<>("Min Height", 310, -64, 2000)
             .incremental(5);
 
-    private final NumberSetting<Integer> Steps = new NumberSetting<>("Step Count", 20, 1, 100)
-            .incremental(1)
-            .onChange(c -> i = c+1);
+    private final NumberSetting<Integer> Steps = new NumberSetting<>("Step Count", 10, 1, 100)
+            .incremental(1);
+//            .onChange(c -> i = c+1);
 
     /*
     private final BooleanSetting Efly = new BooleanSetting("Elytra Fly", false);
@@ -80,13 +84,13 @@ public class EflyModule extends ToggleableModule {
 
 
 
-    private final BooleanSetting FireWorks = new BooleanSetting("Fireworks", false);
+    private final BooleanSetting FireWorks = new BooleanSetting("Fireworks", true);
 
 
     private final NumberSetting<Integer> FireWorkExtraHeight = new NumberSetting<>("Extra Height", 10, 0, 100)
             .incremental(5);
 
-    private final NumberSetting<Integer> FireworkMaintainPitch = new NumberSetting<>("Maintain pitch", 0, -90, 90)
+    private final NumberSetting<Integer> FireworkMaintainPitch = new NumberSetting<>("Maintain Pitch", 0, -90, 90)
             .incremental(5);
 
     private final NumberSetting<Integer> FireworkCoolDown = new NumberSetting<>("Cooldown", 60, 0, 150)
@@ -96,8 +100,11 @@ public class EflyModule extends ToggleableModule {
 
     private final BooleanSetting Emergency = new BooleanSetting("Emergency","Transition to gliding on rocket depletion", true);
 
-    private final NumberSetting<Integer> EmergencyPitch = new NumberSetting<>("Down Pitch", -45 , -90, 90)
+    private final NumberSetting<Integer> EmergencyPitch = new NumberSetting<>("Pitch", -10 , -90, 90)
+
             .incremental(1)
+            .clampMax()
+            .clampMin()
             .onChange(c -> {
                 if(emergency) {
                     pitch = c;
@@ -155,11 +162,13 @@ public class EflyModule extends ToggleableModule {
             return;
         }*/
 
+
+
         //moves to correct angle
-        if (i < this.Steps.getValue() && i != -1) {
+        if (i < tempSteps && i != -1) {
 
             i = i+1;
-            pitch = mc.player.getXRot() + (target - tempPitch)/this.Steps.getValue();
+            pitch = mc.player.getXRot() + (target - tempPitch)/tempSteps;
             //fireworkDelay = this.FireworkCoolDown.getValue();
 
         } else {
@@ -197,6 +206,7 @@ public class EflyModule extends ToggleableModule {
 
                 tempPitch = mc.player.getXRot();
                 target = this.FireworkMaintainPitch.getValue();
+                tempSteps = this.Steps.getValue();
                 i = 0;
 
                 //if above height but below extra height
@@ -206,6 +216,7 @@ public class EflyModule extends ToggleableModule {
                 tempPitch = mc.player.getXRot();
                 goingUp = false;
                 target = this.EflyDownPitch.getValue();
+                tempSteps = this.Steps.getValue();
                 i = 0;
 
                 // if below height
@@ -230,6 +241,7 @@ public class EflyModule extends ToggleableModule {
                             goingUp = false;
                             tempPitch = mc.player.getXRot();
                             target = this.EmergencyPitch.getValue();
+                            tempSteps = this.Steps.getValue();
                             i = 0;
 
                         } else if( !this.Emergency.getValue() ) {
@@ -244,6 +256,7 @@ public class EflyModule extends ToggleableModule {
                             goingUp = true;
                             tempPitch = mc.player.getXRot();
                             target = this.EflyUpPitch.getValue();
+                            tempSteps = this.Steps.getValue();
                             i = 0;
                         }
 
@@ -283,6 +296,7 @@ public class EflyModule extends ToggleableModule {
                 tempPitch = mc.player.getXRot();
                 goingUp = false;
                 target = this.EflyDownPitch.getValue();
+                tempSteps = this.Steps.getValue();
                 i = 0;
             }
 
@@ -297,6 +311,7 @@ public class EflyModule extends ToggleableModule {
                 tempPitch = mc.player.getXRot();
                 goingUp = true;
                 target = this.EflyUpPitch.getValue();
+                tempSteps = this.Steps.getValue();
                 i = 0;
             }
         }
@@ -322,7 +337,7 @@ public class EflyModule extends ToggleableModule {
                 toggle();
 
             } else {
-                target = Float.valueOf(this.EflyUpPitch.getValue());
+                target = (float) this.EflyUpPitch.getValue();
                 goingUp = true;
 
             }
@@ -334,5 +349,6 @@ public class EflyModule extends ToggleableModule {
         }
         i = 0;
         tempPitch = mc.player.getXRot();
+        tempSteps = this.Steps.getValue();
     }
 }
