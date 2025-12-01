@@ -3,3 +3,5 @@ Highly customizable rusher hack efly plugin options allowing for 40-40 pitch, an
 Also has an auto firework mode that climbs to correct height and waits there till firework boost ends (stops speed being lost on the way down and reduces use of firework on next cycle).
 
 Has a 2B2T mode, only really necessary when climbing at 90 degrees up to 1000+ blocks, works by wiggling the pitch back and fourth by a set amount.
+
+Please Note! emergency pitch is the same sign as the rest of the plugin & minecraft. Eg. negative is pitch up, positive is pitch down!
